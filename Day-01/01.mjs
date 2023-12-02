@@ -1,4 +1,5 @@
 import fs from "fs";
+
 /*
 --- Day 1: Trebuchet?! ---
 Something is wrong with global snow production, and you've been selected to take a look. The Elves have even given you a map; on it, they've used stars to mark the top fifty locations that are likely to be having problems.
@@ -26,120 +27,42 @@ Consider your entire calibration document. What is the sum of all of the calibra
 
 const mapper = {};
 const digits = [];
-const numberDigits = [
-  {
-    key: "one",
-    value: "1",
-  },
-  {
-    key: "two",
-    value: "2",
-  },
-  {
-    key: "three",
-    value: "3",
-  },
-  {
-    key: "four",
-    value: "4",
-  },
-  {
-    key: "five",
-    value: "5",
-  },
-  {
-    key: "six",
-    value: "6",
-  },
-  {
-    key: "seven",
-    value: "7",
-  },
-  {
-    key: "eight",
-    value: "8",
-  },
-  {
-    key: "nine",
-    value: "9",
-  },
-];
+let totalSum = 0;
 
-function readFile(input) {
-  const filePath = `./${input}`;
+function readFile() {
+  const filePath = "./input.txt";
   const data = fs.readFileSync(filePath, "utf-8");
   return data.split("\n");
 }
 
-function verifyDigitsInStr(str) {
-  for (const digit of numberDigits) {
-    if (str.includes(digit.key)) {
-      str = str.replace(
-        digit.key,
-        `${digit.value}${digit.key[digit.key.length - 1]}`
-      );
+const input = readFile();
+
+for (let i = 0; i < input.length; i++) {
+  const str = input[i];
+  for (let j = 0; j < str.length; j++) {
+    const element = Number(str[j]);
+    if (Number.isInteger(element)) {
+      Object.assign(mapper, {
+        [str]: {
+          values: mapper[str] ? [...mapper[str].values, element] : [element],
+        },
+      });
     }
   }
-  //   console.log(str);
-  return str;
 }
 
-function verifyNumberDigitsFromStr(str) {
-  //   return verifyDigitsInStr(str);
-  let tempStr = "";
-  for (let i = 0; i < str.length; i++) {
-    tempStr += str[i];
-    // console.log(tempStr);
-    tempStr = verifyDigitsInStr(tempStr);
-  }
-  return tempStr;
+for (const key in mapper) {
+  const values = mapper[key].values;
+  const firstValue = values[0];
+  const lastValue = values[values.length - 1];
+  digits.push({
+    key: Number(`${firstValue}${lastValue}`),
+  });
 }
 
-function assignMapper(input) {
-  for (let i = 0; i < input.length; i++) {
-    const str = verifyNumberDigitsFromStr(input[i]);
-    // console.log(str);
-    for (let j = 0; j < str.length; j++) {
-      const element = Number(str[j]);
-      if (Number.isInteger(element)) {
-        Object.assign(mapper, {
-          [str]: {
-            values: mapper[str] ? [...mapper[str].values, element] : [element],
-          },
-        });
-      }
-    }
-  }
-  //   console.log(mapper);
+for (const value of digits) {
+  const key = value.key;
+  totalSum += key;
 }
 
-function pushDigits() {
-  for (const key in mapper) {
-    const values = mapper[key].values;
-    const firstValue = values[0];
-    const lastValue = values[values.length - 1];
-    digits.push({
-      key: `${firstValue}${lastValue}`,
-    });
-  }
-  //   console.log(digits);
-}
-
-function sumValues() {
-  let totalSum = 0;
-  //   console.log(digits.length);
-  for (const value of digits) {
-    const key = value.key;
-    totalSum += Number(key);
-  }
-  return totalSum;
-}
-
-function main() {
-  const input = readFile("input.txt");
-  assignMapper(input);
-  pushDigits();
-  const sum = sumValues();
-  console.log(sum);
-}
-main();
+console.log(totalSum);
